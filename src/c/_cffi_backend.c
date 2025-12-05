@@ -6027,7 +6027,11 @@ static CTypeDescrObject *fb_prepare_ctype(struct funcbuilder_s *fb,
     fb->bufferp = NULL;
     fb->fct = NULL;
 
+#if PY_VERSION_HEX >= 0x030a0000  /* Python 3.10+ */
+    pfargs = (CTypeDescrObject **)((PyTupleObject *)fargs)->ob_item;
+#else
     pfargs = (CTypeDescrObject **)&PyTuple_GET_ITEM(fargs, 0);
+#endif
     nargs = PyTuple_GET_SIZE(fargs);
 #if defined(MS_WIN32) && !defined(_WIN64)
     if (fabi == FFI_STDCALL)
