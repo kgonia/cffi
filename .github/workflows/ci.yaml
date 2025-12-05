@@ -139,6 +139,9 @@ jobs:
           - { spec: cp314-manylinux_s390x, arch: s390x, omit: ${{ env.skip_slow_jobs }} }
           - { spec: cp314t-manylinux_s390x, arch: s390x, omit: ${{ env.skip_slow_jobs }} }
 
+          # x86_64 graalpy
+          - { spec: graalpy25-manylinux_x86_64, arch: x86_64 }
+
   linux:
     needs: [python_sdist, make_linux_matrix]
     runs-on: ${{ (matrix.arch == 'aarch64') && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
@@ -235,6 +238,10 @@ jobs:
           - { spec: cp314-macosx_arm64, deployment_target: '11.0', run_wrapper: 'arch -arm64 bash --noprofile --norc -eo pipefail {0}' }
           - { spec: cp314t-macosx_arm64, deployment_target: '11.0', run_wrapper: 'arch -arm64 bash --noprofile --norc -eo pipefail {0}' }
 
+          # graalpy macos
+          - { spec: graalpy25-macosx_x86_64, runs_on: [macos-15-intel] }
+          - { spec: graalpy25-macosx_arm64, deployment_target: '11.0', run_wrapper: 'arch -arm64 bash --noprofile --norc -eo pipefail {0}' }
+
   macos:
     needs: [python_sdist, make_macos_matrix]
     defaults:
@@ -328,6 +335,9 @@ jobs:
           - { spec: cp313-win_arm64, runs_on: windows-11-arm, omit: ${{ env.skip_ci_redundant_jobs }} }
           - { spec: cp314-win_arm64, runs_on: windows-11-arm }
           - { spec: cp314t-win_arm64, runs_on: windows-11-arm }
+
+          # graalpy windows
+          - { spec: graalpy25-win_amd64 }
 
   windows:
     needs: [python_sdist, make_windows_matrix]
