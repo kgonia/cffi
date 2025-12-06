@@ -6027,8 +6027,8 @@ static CTypeDescrObject *fb_prepare_ctype(struct funcbuilder_s *fb,
     fb->bufferp = NULL;
     fb->fct = NULL;
 
-#if PY_VERSION_HEX >= 0x030a0000  /* Python 3.10+ */
-    pfargs = (CTypeDescrObject **)((PyTupleObject *)fargs)->ob_item;
+#ifdef GRAALVM_PYTHON
+    pfargs = (CTypeDescrObject **)GraalPyTuple_ITEMS(fargs);
 #else
     pfargs = (CTypeDescrObject **)&PyTuple_GET_ITEM(fargs, 0);
 #endif
