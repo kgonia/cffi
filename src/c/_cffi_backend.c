@@ -6027,6 +6027,9 @@ static CTypeDescrObject *fb_prepare_ctype(struct funcbuilder_s *fb,
     fb->bufferp = NULL;
     fb->fct = NULL;
 
+    /* GraalPy requires GraalPyTuple_ITEMS() for optimal compatibility with its
+       internal tuple representation. Other Python implementations use the
+       standard PyTuple_GET_ITEM approach. */
 #ifdef GRAALVM_PYTHON
     pfargs = (CTypeDescrObject **)GraalPyTuple_ITEMS(fargs);
 #else
