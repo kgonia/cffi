@@ -910,7 +910,7 @@ _my_PyLong_AsLongLong(PyObject *ob)
     else {
         PyObject *io;
         PY_LONG_LONG res;
-        PyNumberMethods *nb = ob->ob_type->tp_as_number;
+        PyNumberMethods *nb = Py_TYPE(ob)->tp_as_number;
 
         if (CDataObject_Or_PyFloat_Check(ob) ||
                 nb == NULL || nb->nb_int == NULL) {
@@ -941,6 +941,13 @@ _my_PyLong_AsUnsignedLongLong(PyObject *ob, int strict)
        does conversions from other types of objects.  If 'strict', complains
        with OverflowError and refuses floats.  If '!strict', rounds floats
        and masks the result. */
+    if (ob == Py_None) {
+        PyErr_SetString(PyExc_TypeError, "an integer is required");
+        return (unsigned PY_LONG_LONG)-1;
+    }
+    if (Py_TYPE(ob) == NULL) {
+        return (unsigned PY_LONG_LONG)-1;
+    }
 #if PY_MAJOR_VERSION < 3
     if (PyInt_Check(ob)) {
         long value1 = PyInt_AS_LONG(ob);
@@ -963,7 +970,7 @@ _my_PyLong_AsUnsignedLongLong(PyObject *ob, int strict)
     else {
         PyObject *io;
         unsigned PY_LONG_LONG res;
-        PyNumberMethods *nb = ob->ob_type->tp_as_number;
+        PyNumberMethods *nb = Py_TYPE(ob)->tp_as_number;
 
         if ((strict && CDataObject_Or_PyFloat_Check(ob)) ||
                 nb == NULL || nb->nb_int == NULL) {
@@ -4141,6 +4148,7 @@ static CDataObject *cast_to_integer_or_char(CTypeDescrObject *ct, PyObject *ob)
     unsigned PY_LONG_LONG value;
     CDataObject *cd;
 
+
     if (CData_Check(ob) &&
         ((CDataObject *)ob)->c_type->ct_flags &
                                  (CT_POINTER|CT_FUNCTIONPTR|CT_ARRAY)) {
@@ -4242,6 +4250,7 @@ static int check_bytes_for_float_compatible(PyObject *io, double *out_value)
 static PyObject *do_cast(CTypeDescrObject *ct, PyObject *ob)
 {
     CDataObject *cd;
+
 
     if (ct->ct_flags & (CT_POINTER|CT_FUNCTIONPTR|CT_ARRAY) &&
         ct->ct_size >= 0) {
@@ -8204,6 +8213,7 @@ init_cffi_backend(void)
     PyObject *m, *v;
     int i;
     static char init_done = 0;
+
     static PyTypeObject *all_types[] = {
         &dl_type,
         &CTypeDescr_Type,
