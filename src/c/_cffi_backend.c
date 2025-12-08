@@ -941,13 +941,6 @@ _my_PyLong_AsUnsignedLongLong(PyObject *ob, int strict)
        does conversions from other types of objects.  If 'strict', complains
        with OverflowError and refuses floats.  If '!strict', rounds floats
        and masks the result. */
-    if (ob == Py_None) {
-        PyErr_SetString(PyExc_TypeError, "an integer is required");
-        return (unsigned PY_LONG_LONG)-1;
-    }
-    if (Py_TYPE(ob) == NULL) {
-        return (unsigned PY_LONG_LONG)-1;
-    }
 #if PY_MAJOR_VERSION < 3
     if (PyInt_Check(ob)) {
         long value1 = PyInt_AS_LONG(ob);
