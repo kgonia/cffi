@@ -140,7 +140,7 @@ jobs:
           - { spec: cp314t-manylinux_s390x, arch: s390x, omit: ${{ env.skip_slow_jobs }} }
 
           # x86_64 graalpy
-          - { spec: graalpy25-manylinux_x86_64, arch: x86_64 }
+          - { spec: gp312_250-manylinux_x86_64, arch: x86_64 }
 
   linux:
     needs: [python_sdist, make_linux_matrix]
@@ -166,6 +166,7 @@ jobs:
         CFLAGS: -Dffi_call=cffistatic_ffi_call  # override name for ffi_call to break hard if we linked against someone else's libffi
         CIBW_ARCHS_LINUX: all
         CIBW_BUILD: ${{ matrix.spec }}
+        CIBW_ENABLE: graalpy
         CIBW_BEFORE_BUILD: |
           set -eux && \
           curl -L -O https://github.com/libffi/libffi/archive/v3.4.6.tar.gz && \
@@ -239,8 +240,8 @@ jobs:
           - { spec: cp314t-macosx_arm64, deployment_target: '11.0', run_wrapper: 'arch -arm64 bash --noprofile --norc -eo pipefail {0}' }
 
           # graalpy macos
-          - { spec: graalpy25-macosx_x86_64, runs_on: [macos-15-intel] }
-          - { spec: graalpy25-macosx_arm64, deployment_target: '11.0', run_wrapper: 'arch -arm64 bash --noprofile --norc -eo pipefail {0}' }
+          - { spec: gp312_250-macosx_x86_64, runs_on: [macos-15-intel] }
+          - { spec: gp312_250-macosx_arm64, deployment_target: '11.0', run_wrapper: 'arch -arm64 bash --noprofile --norc -eo pipefail {0}' }
 
   macos:
     needs: [python_sdist, make_macos_matrix]
@@ -275,6 +276,7 @@ jobs:
       id: build
       env:
         CIBW_BUILD: ${{ matrix.spec }}
+        CIBW_ENABLE: graalpy
         CIBW_TEST_REQUIRES: pytest setuptools
         CIBW_TEST_COMMAND: pip install pip --upgrade; cd {project}; PYTHONUNBUFFERED=1 pytest
         MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target || '10.13' }}
@@ -337,7 +339,7 @@ jobs:
           - { spec: cp314t-win_arm64, runs_on: windows-11-arm }
 
           # graalpy windows
-          - { spec: graalpy25-win_amd64 }
+          - { spec: gp312_250-win_amd64 }
 
   windows:
     needs: [python_sdist, make_windows_matrix]
@@ -362,6 +364,7 @@ jobs:
       id: build
       env:
         CIBW_BUILD: ${{ matrix.spec }}
+        CIBW_ENABLE: graalpy
         CIBW_TEST_REQUIRES: pytest setuptools
         CIBW_TEST_COMMAND: ${{ matrix.test_cmd || 'python -m pytest {package}/src/c' }}
         # FIXME: /testing takes ~45min on Windows and has some failures...

@@ -910,7 +910,7 @@ _my_PyLong_AsLongLong(PyObject *ob)
     else {
         PyObject *io;
         PY_LONG_LONG res;
-        PyNumberMethods *nb = ob->ob_type->tp_as_number;
+        PyNumberMethods *nb = Py_TYPE(ob)->tp_as_number;
 
         if (CDataObject_Or_PyFloat_Check(ob) ||
                 nb == NULL || nb->nb_int == NULL) {
@@ -963,7 +963,7 @@ _my_PyLong_AsUnsignedLongLong(PyObject *ob, int strict)
     else {
         PyObject *io;
         unsigned PY_LONG_LONG res;
-        PyNumberMethods *nb = ob->ob_type->tp_as_number;
+        PyNumberMethods *nb = Py_TYPE(ob)->tp_as_number;
 
         if ((strict && CDataObject_Or_PyFloat_Check(ob)) ||
                 nb == NULL || nb->nb_int == NULL) {
@@ -4141,6 +4141,7 @@ static CDataObject *cast_to_integer_or_char(CTypeDescrObject *ct, PyObject *ob)
     unsigned PY_LONG_LONG value;
     CDataObject *cd;
 
+
     if (CData_Check(ob) &&
         ((CDataObject *)ob)->c_type->ct_flags &
                                  (CT_POINTER|CT_FUNCTIONPTR|CT_ARRAY)) {
@@ -4242,6 +4243,7 @@ static int check_bytes_for_float_compatible(PyObject *io, double *out_value)
 static PyObject *do_cast(CTypeDescrObject *ct, PyObject *ob)
 {
     CDataObject *cd;
+
 
     if (ct->ct_flags & (CT_POINTER|CT_FUNCTIONPTR|CT_ARRAY) &&
         ct->ct_size >= 0) {
@@ -6027,7 +6029,14 @@ static CTypeDescrObject *fb_prepare_ctype(struct funcbuilder_s *fb,
     fb->bufferp = NULL;
     fb->fct = NULL;
 
+    /* GraalPy requires GraalPyTuple_ITEMS() for optimal compatibility with its
+       internal tuple representation. Other Python implementations use the
+       standard PyTuple_GET_ITEM approach. */
+#ifdef GRAALVM_PYTHON
+    pfargs = (CTypeDescrObject **)GraalPyTuple_ITEMS(fargs);
+#else
     pfargs = (CTypeDescrObject **)&PyTuple_GET_ITEM(fargs, 0);
+#endif
     nargs = PyTuple_GET_SIZE(fargs);
 #if defined(MS_WIN32) && !defined(_WIN64)
     if (fabi == FFI_STDCALL)
@@ -8197,6 +8206,7 @@ init_cffi_backend(void)
     PyObject *m, *v;
     int i;
     static char init_done = 0;
+
     static PyTypeObject *all_types[] = {
         &dl_type,
         &CTypeDescr_Type,
